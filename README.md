@@ -1,14 +1,11 @@
-Host Machine               Docker Container
-┌─────────────────┐       ┌──────────────────┐
-│ train_model.py  │──────▶│ MLflow Server    │
-│ (Python script)│ HTTP  │ (port 5005)      │
-└─────────────────┘       └──────────────────┘
+<img width="565" height="175" alt="image" src="https://github.com/user-attachments/assets/8b902fbe-92f5-4c65-ae60-a1bd359f3144" />
 
 
 
-MLflow Server: Running in Docker using ghcr.io/mlflow/mlflow pre-built image
-Volume Mount: Persistent storage with mlflow-data/ folder
-Training Pipeline: Python scripts that connect to dockerized MLflow
+
+1. MLflow Server: Running in Docker using ghcr.io/mlflow/mlflow pre-built image
+2. Volume Mount: Persistent storage with mlflow-data/ folder
+3. Training Pipeline: Python scripts that connect to dockerized MLflow
 
 # used an official pre-built image
 ghcr.io/mlflow/mlflow
