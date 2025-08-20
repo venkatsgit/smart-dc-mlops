@@ -1,0 +1,6 @@
+artifact_location: file:///mlflow/mlartifacts/795959668437013956
+creation_time: 1755681075142
+experiment_id: '795959668437013956'
+last_update_time: 1755681075142
+lifecycle_stage: active
+name: voltage-fluctuation-prediction

@@ -1,0 +1,14 @@
+artifact_uri: file:///mlflow/mlartifacts/331742456980988761/9e4fc38e18ea478896453df1cf1692dc/artifacts
+end_time: 1755680675820
+entry_point_name: ''
+experiment_id: '331742456980988761'
+lifecycle_stage: active
+run_id: 9e4fc38e18ea478896453df1cf1692dc
+run_name: glamorous-shrike-879
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755680673295
+status: 4
+tags: []
+user_id: evaagar

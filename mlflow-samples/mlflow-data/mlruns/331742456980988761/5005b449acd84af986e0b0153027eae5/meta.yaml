@@ -1,0 +1,14 @@
+artifact_uri: file:///mlflow/mlartifacts/331742456980988761/5005b449acd84af986e0b0153027eae5/artifacts
+end_time: 1755680370082
+entry_point_name: ''
+experiment_id: '331742456980988761'
+lifecycle_stage: active
+run_id: 5005b449acd84af986e0b0153027eae5
+run_name: big-seal-383
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755680367101
+status: 4
+tags: []
+user_id: evaagar

@@ -1,0 +1,14 @@
+artifact_uri: file:///mlflow/mlartifacts/331742456980988761/f4f592d588c64fa49f81b78c919ab2ab/artifacts
+end_time: 1755680494036
+entry_point_name: ''
+experiment_id: '331742456980988761'
+lifecycle_stage: active
+run_id: f4f592d588c64fa49f81b78c919ab2ab
+run_name: sneaky-moth-769
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755680491393
+status: 4
+tags: []
+user_id: evaagar
