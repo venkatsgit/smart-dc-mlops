@@ -37,3 +37,12 @@ docker run -d \
 
 
   <img width="1887" height="717" alt="image" src="https://github.com/user-attachments/assets/5b65f4d1-2961-4b82-a21f-140d544583fe" />
+
+
+  <img width="1895" height="949" alt="image" src="https://github.com/user-attachments/assets/ec808855-d3b8-4b6a-ac15-09a820932406" />
+
+
+  <img width="1575" height="888" alt="image" src="https://github.com/user-attachments/assets/d493b362-d960-46f9-b332-703929dc2101" />
+
+  <img width="1611" height="886" alt="image" src="https://github.com/user-attachments/assets/c77a5b33-4dd9-4b4e-b03a-0848a32d9d23" />
+
