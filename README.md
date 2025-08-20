@@ -6,6 +6,10 @@ Host Machine               Docker Container
 
 
 
+MLflow Server: Running in Docker using ghcr.io/mlflow/mlflow pre-built image
+Volume Mount: Persistent storage with mlflow-data/ folder
+Training Pipeline: Python scripts that connect to dockerized MLflow
+
 # used an official pre-built image
 ghcr.io/mlflow/mlflow
 
