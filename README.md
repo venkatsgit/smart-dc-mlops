@@ -31,3 +31,8 @@ docker run -d \
   docker logs mlflow-volume
 
   python3 train_voltage_model.py --mlflow-server http://localhost:5005
+
+
+
+
+  <img width="1887" height="717" alt="image" src="https://github.com/user-attachments/assets/5b65f4d1-2961-4b82-a21f-140d544583fe" />
