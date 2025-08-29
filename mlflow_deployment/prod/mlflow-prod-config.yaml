@@ -6,9 +6,9 @@ PORT: 8000
 DEBUG: False
 LOG_LEVEL: WARNING
 
-# Access Configuration - Ingress with automatic Load Balancer
+# Access Configuration - Use ClusterIP with Ingress
 SERVICE_TYPE: ClusterIP
-MLFLOW_PATH: /mlflow
+MLFLOW_PATH: /mlflowprod
 
 # PostgreSQL Configuration
 PG_USER: kdchdb005

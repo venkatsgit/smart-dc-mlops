@@ -20,7 +20,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: /mlflow(/|$)(.*)
+      - path: /mlflowprod(/|$)(.*)
         pathType: Prefix
         backend:
           service:
