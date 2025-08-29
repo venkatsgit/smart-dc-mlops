@@ -15,12 +15,23 @@ spec:
       labels:
         app: nginx-ingress-controller
     spec:
+      serviceAccountName: nginx-ingress-serviceaccount
       containers:
       - name: nginx-ingress-controller
         image: registry.k8s.io/ingress-nginx/controller:v1.8.1
         args:
         - /nginx-ingress-controller
         - --ingress-class=nginx
+        - --publish-service=$(POD_NAMESPACE)/nginx-ingress-controller
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         ports:
         - containerPort: 80
           protocol: TCP
@@ -33,3 +44,23 @@ spec:
           limits:
             cpu: 200m
             memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          runAsUser: 101
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10254
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 10254
+          initialDelaySeconds: 10
+          timeoutSeconds: 1

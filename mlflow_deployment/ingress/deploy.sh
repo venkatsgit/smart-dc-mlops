@@ -4,6 +4,7 @@ echo "Deploying simple NGINX Ingress Controller..."
 
 # Apply all YAML files in order
 kubectl apply -f 00-namespace.yaml
+kubectl apply -f 01-rbac.yaml
 kubectl apply -f 01-basic-auth-secret.yaml
 kubectl apply -f 02-nginx-ingress-controller.yaml
 kubectl apply -f 03-service.yaml
