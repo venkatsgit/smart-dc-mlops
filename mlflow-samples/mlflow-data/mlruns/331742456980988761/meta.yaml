@@ -1,6 +1,0 @@
-artifact_location: file:///mlflow/mlartifacts/331742456980988761
-creation_time: 1755680366958
-experiment_id: '331742456980988761'
-last_update_time: 1755680366958
-lifecycle_stage: active
-name: volume-mounted-training

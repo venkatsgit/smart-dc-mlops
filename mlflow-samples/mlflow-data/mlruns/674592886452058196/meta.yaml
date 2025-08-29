@@ -1,6 +1,0 @@
-artifact_location: file:///mlflow/mlartifacts/674592886452058196
-creation_time: 1755680756856
-experiment_id: '674592886452058196'
-last_update_time: 1755680756856
-lifecycle_stage: active
-name: simple-training

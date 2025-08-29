@@ -1,140 +1,263 @@
-Host Machine               Docker Container
-┌─────────────────┐       ┌──────────────────┐
-│ train_model.py  │──────▶│ MLflow Server    │
-│ (Python script)│ HTTP  │ (port 5005)      │
-└─────────────────┘       └──────────────────┘
+# MLflow Kubernetes Deployment
 
+This directory contains Kubernetes deployment configurations for MLflow in both development and production environments.
 
+## Overview
 
-# used an official pre-built image
-ghcr.io/mlflow/mlflow
+The deployment includes:
+- **MLflow Server**: For experiment tracking and model registry (v2.0.1)
+- **PostgreSQL Database**: For storing MLflow metadata
+- **Azure File Share**: For storing model artifacts and files
+- **Kubernetes Resources**: Deployment, Service, PV, PVC, Secrets, and Ingress
+- **Automatic Load Balancer**: AKS creates public Load Balancer for external access
 
+## Directory Structure
 
+```
+mlflow_deployment/
+├── templates/                          # Base template files
+│   ├── mlflow-deployment-template.yaml
+│   ├── mlflow-service-template.yaml
+│   ├── mlflow-pv-template.yaml
+│   ├── mlflow-pvc-template.yaml
+│   ├── mlflow-postgres-secret-template.yaml
+│   └── mlflow-ingress-template.yaml
+├── dev/                               # Dev environment configs
+│   ├── mlflow-dev-config.yaml
+│   └── generated/                     # Generated YAML files
+├── prod/                              # Prod environment configs
+│   ├── mlflow-prod-config.yaml
+│   └── generated/                     # Generated YAML files
+├── deploy.py                          # Deployment script
+├── deploy.sh                          # Shell deployment script
+├── requirements.txt                   # Python dependencies
+└── README.md                          # This file
+```
 
-#  Python training script runs locally
-python3 train_model.py --mlflow-server http://localhost:5005
-# ↑ Runs on host    ↑ Connects to Docker container
+## Prerequisites
 
+1. **Kubernetes Cluster**: Access to a Kubernetes cluster (AKS recommended)
+2. **Azure File Share**: Access to Azure File Storage with shares:
+   - `dev-preprocessed-artifacts` (dev)
+   - `prod-preprocessed-artefacts` (prod)
+3. **PostgreSQL Database**: Access to the specified databases
+4. **Azure Secret**: `azure-secret` containing Azure File Share credentials
+5. **NGINX Ingress Controller**: For handling external traffic routing
+6. **Python Dependencies**: Install requirements with `pip install -r requirements.txt`
 
-docker run -d \
-  --name mlflow-volume \
-  --user $(id -u):$(id -g) \
-  -p 5005:5000 \
-  -v $(pwd)/mlflow-data:/mlflow \
-  ghcr.io/mlflow/mlflow \
-  mlflow server \
-  --backend-store-uri file:///mlflow/mlruns \
-  --default-artifact-root file:///mlflow/mlartifacts \
-  --host 0.0.0.0 \
-  --port 5000
+## Configuration
 
-  docker logs mlflow-volume
+### Environment Variables
 
-  python3 train_voltage_model.py --mlflow-server http://localhost:5005
+Each environment has its own configuration file with:
+- **Namespace**: `smart-dc-dev` or `smart-dc-prod`
+- **PostgreSQL**: Connection details and schema
+- **Azure File Share**: Share names for artifacts
+- **MLflow**: Image (v2.0.1), ports, and settings
+- **Access**: Ingress path configuration (`/mlflow`)
 
+### Database Schema
 
-  Your Computer (Permanent)     Docker Container (Temporary)
-┌─────────────────────┐      ┌────────────────────┐
-│ mlflow-data/        │      │ /mlflow/           │
-│   mlruns/           │◄────►│   mlruns/          │
-│   mlartifacts/      │ SYNC │   mlartifacts/     │
-│   experiments/      │      │   experiments/     │
-│   models/           │      │   models/          │
-└─────────────────────┘      └────────────────────┘
-    ↑ PERSISTS                    ↑ GETS DELETED
+The MLflow metadata will be stored in the `mlflow` schema of the PostgreSQL database.
 
+### Access Configuration
 
-   docker run -d \
-  --name mlflow-volume \           # Container name
-  --user $(id -u):$(id -g) \       # Run with YOUR user permissions (fixes volume issues)
-  -p 5005:5000 \                   # Port mapping: localhost:5005 → container:5000
-  -v $(pwd)/mlflow-data:/mlflow \   # Volume mount: local folder → container folder
+MLflow is accessible via:
+- **Path**: `/mlflow` (configurable)
+- **Service Type**: ClusterIP (internal access)
+- **External Access**: Through Ingress with automatic Load Balancer
 
-  ghcr.io/mlflow/mlflow \             # Official MLflow image
-mlflow server \                     # Start MLflow server
---backend-store-uri file:///mlflow/mlruns \        # Store experiments here
---default-artifact-root file:///mlflow/mlartifacts \ # Store models here
---host 0.0.0.0 \                    # Accept connections from anywhere
---port 5000                         # Server runs on port 5000 inside container
+## Deployment
 
+### Option 1: Using deploy.sh (Recommended for Linux/Mac)
 
-# Stop and remove the container
-docker stop mlflow-volume
-docker rm mlflow-volume
+The `deploy.sh` script generates Kubernetes YAML files from templates for easy deployment.
 
-# Container is GONE, but data is safe
-docker ps  # Container not listed
-ls -la mlflow-data/  # Data still there!
+#### Prerequisites for deploy.sh
+- Linux/Mac environment (or WSL on Windows)
+- `python` available in PATH
 
-# Run the SAME command
-docker run -d \
-  --name mlflow-volume \
-  --user $(id -u):$(id -g) \
-  -p 5005:5000 \
-  -v $(pwd)/mlflow-data:/mlflow \
-  ghcr.io/mlflow/mlflow \
-  mlflow server \
-  --backend-store-uri file:///mlflow/mlruns \
-  --default-artifact-root file:///mlflow/mlartifacts \
-  --host 0.0.0.0 \
-  --port 5000
+#### Generate YAML files for Dev Environment
+```bash
+./deploy.sh dev
+```
 
-  # Check container is running
-docker ps
+#### Generate YAML files for Production Environment
+```bash
+./deploy.sh prod
+```
 
-# Go to http://localhost:5005
-# ✅ All your experiments are there!
-# ✅ All your models are there!
-# ✅ All your runs and metrics are there!
+#### What deploy.sh does:
+1. ✅ Validates environment parameter (dev/prod)
+2. ✅ Checks if Python is available
+3. ✅ Generates Kubernetes YAML files from templates
+4. ✅ Places generated files in `<env>/generated/` directory
+5. ✅ Provides kubectl commands for manual deployment
 
+#### After generating YAML files, deploy manually:
+```bash
+# Deploy to Kubernetes
+kubectl apply -f <env>/generated/
+```
 
-What gets DELETED:        What stays PERMANENT:
-┌─────────────────┐      ┌──────────────────────┐
-│ ❌ Container     │      │ ✅ mlflow-data/      │
-│ ❌ MLflow process│      │ ✅ All experiments   │
-│ ❌ Memory state  │      │ ✅ All models        │
-└─────────────────┘      │ ✅ All runs          │
-                         │ ✅ All metrics       │
-                         └──────────────────────┘
+### Option 2: Manual Deployment
 
-# Inside container paths:
-/mlflow/mlruns/        ← Experiment metadata
-/mlflow/mlartifacts/   ← Model files & artifacts
+#### 1. Generate YAML Files
 
-# Maps to your local paths:
-mlflow-data/mlruns/        ← What you see in VS Code
-mlflow-data/mlartifacts/   ← Model storage
+Run the deployment script to generate environment-specific YAML files:
 
+```bash
+python deploy.py
+```
 
+This will create the `generated/` directories with ready-to-deploy YAML files.
 
+#### 2. Deploy to Kubernetes
 
-for postgres:
+##### Dev Environment
+```bash
+kubectl apply -f dev/generated/
+```
 
-docker run -d \
-  --name mlflow-server \
-  -p 5000:5000 \
-  -v $(pwd)/artifacts:/mlflow/artifacts \
-  mlflow-postgres \
-  mlflow server \
-    --backend-store-uri "postgresql://citus:password@chost/citus?options=-csearch_path=mlflow" \
-    --default-artifact-root "/mlflow/artifacts" \
-    --host 0.0.0.0 \
-    --port 5000
+##### Production Environment
+```bash
+kubectl apply -f prod/generated/
+```
 
+#### 3. Verify Deployment
 
+Check the deployment status:
 
-1. Metadata
+```bash
+# Check pods
+kubectl get pods -n smart-dc-dev
+kubectl get pods -n smart-dc-prod
 
-Stored in your Citus/Postgres schema (mlflow schema).
+# Check services
+kubectl get svc -n smart-dc-dev
+kubectl get svc -n smart-dc-prod
 
-This lives outside the container, so restarting or recreating the container does not delete your experiments, runs, or metrics.
+# Check ingress
+kubectl get ingress -n smart-dc-dev
+kubectl get ingress -n smart-dc-prod
+```
 
-2. Artifacts
+## Access MLflow
 
-Stored in the Docker volume mlruns (/mlflow/artifacts).
+### UI Access (Human Users)
 
-Docker volumes are persistent, meaning:
+Once deployed, MLflow will be accessible via:
+- **Dev**: `http://<load-balancer-ip>/mlflow`
+- **Prod**: `http://<load-balancer-ip>/mlflow`
 
-If the container stops or is removed, the volume remains.
+To get the Load Balancer IP:
+```bash
+kubectl get svc -n kube-system | grep LoadBalancer
+```
 
-When you start a new container using the same volume, all your model artifacts are still there.
+### Client Code Access (Python/Preprocessing/Training)
+
+#### Through Ingress (Recommended)
+```python
+import mlflow
+
+# Dev Environment
+mlflow.set_tracking_uri("http://<load-balancer-ip>/mlflow")
+mlflow.set_experiment("my_experiment")
+
+# Production Environment
+mlflow.set_tracking_uri("http://<load-balancer-ip>/mlflow")
+mlflow.set_experiment("my_experiment")
+```
+
+### Example Client Code
+
+```python
+# training_script.py
+import mlflow
+import mlflow.sklearn
+
+# Connect to MLflow (Dev)
+mlflow.set_tracking_uri("http://<load-balancer-ip>/mlflow")
+
+# Set experiment
+mlflow.set_experiment("chiller_anomaly_detection")
+
+# Start run
+with mlflow.start_run():
+    # Your ML code here
+    mlflow.log_param("model_type", "random_forest")
+    mlflow.log_metric("accuracy", 0.95)
+    
+    # Log model
+    mlflow.sklearn.log_model(model, "model")
+```
+
+### Environment-Based Configuration
+
+```python
+import os
+
+# Set MLflow URI based on environment
+if os.getenv("ENV") == "prod":
+    mlflow.set_tracking_uri("http://<load-balancer-ip>/mlflow")
+else:
+    mlflow.set_tracking_uri("http://<load-balancer-ip>/mlflow")
+```
+
+## Customization
+
+### Update Configuration
+
+Edit the environment-specific config files:
+- `dev/mlflow-dev-config.yaml`
+- `prod/mlflow-prod-config.yaml`
+
+### Modify Templates
+
+Edit files in the `templates/` directory and regenerate using `deploy.py`.
+
+### Add New Environments
+
+1. Create a new config file in a new directory
+2. Update `deploy.py` to include the new environment
+3. Run the deployment script
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Azure File Share Access**: Ensure `azure-secret` exists and has correct credentials
+2. **PostgreSQL Connection**: Verify database connectivity and schema existence
+3. **Storage Issues**: Verify PV/PVC binding and Azure File Share access
+4. **Ingress Issues**: Check if NGINX Ingress Controller is running
+
+### Logs
+
+Check MLflow pod logs:
+```bash
+kubectl logs -f deployment/mlflow-dev -n smart-dc-dev
+kubectl logs -f deployment/mlflow-prod -n smart-dc-prod
+```
+
+Check Ingress logs:
+```bash
+kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
+```
+
+## Security Notes
+
+- Database credentials are stored as Kubernetes secrets
+- Azure File Share credentials should be managed securely
+- Consider implementing network policies for additional security
+- MLflow is accessible via HTTP (no built-in authentication)
+
+## Support
+
+For issues or questions, check:
+1. Kubernetes cluster logs
+2. MLflow application logs
+3. Network connectivity to Azure and PostgreSQL
+4. Resource quotas and limits
+5. NGINX Ingress Controller status
+6. Load Balancer provisioning status
