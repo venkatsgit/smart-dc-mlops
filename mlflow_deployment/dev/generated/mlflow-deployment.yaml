@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-dev
+  namespace: smart-dc-dev
+  labels:
+    app: mlflow
+    environment: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+      environment: dev
+  template:
+    metadata:
+      labels:
+        app: mlflow
+        environment: dev
+    spec:
+      containers:
+      - name: mlflow
+        image: aimlsgkdchregistrydev.azurecr.io/smart-dc-mlflow:v3.3.2
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-postgres-secret-dev
+              key: PG_USER
+        - name: PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-postgres-secret-dev
+              key: PG_PASSWORD
+        - name: PG_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-postgres-secret-dev
+              key: PG_HOST
+        - name: PG_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-postgres-secret-dev
+              key: PG_DATABASE
+        - name: PG_PORT
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-postgres-secret-dev
+              key: PG_PORT
+        - name: PG_SCHEMA
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-postgres-secret-dev
+              key: PG_SCHEMA
+        - name: DEBUG
+          value: "False"
+        - name: LOG_LEVEL
+          value: "WARNING"
+        - name: PORT
+          value: "8000"
+        - name: MLFLOW_TRACKING_URI
+          value: "postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PG_DATABASE)?options=-csearch_path%3D$(PG_SCHEMA)"
+        - name: MLFLOW_DEFAULT_ARTIFACT_ROOT
+          value: "file:///mlflow/artifacts"
+
+        command:
+        - mlflow
+        args:
+        - server
+        - --host
+        - 0.0.0.0
+        - --port
+        - "8000"
+        - --backend-store-uri
+        - "postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PG_DATABASE)?options=-csearch_path%3D$(PG_SCHEMA)"
+        - --default-artifact-root
+        - "file:///mlflow/artifacts"
+        volumeMounts:
+        - name: mlflow-artifacts
+          mountPath: /mlflow/artifacts
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: mlflow-artifacts
+        persistentVolumeClaim:
+          claimName: mlflow-artifacts-pvc-dev

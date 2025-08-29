@@ -1,6 +1,6 @@
 # Generated deployment files
-dev/generated/
-prod/generated/
+dev/generated/*secret.yaml
+prod/generated/*secret.yaml
 
 # Environment files
 .env

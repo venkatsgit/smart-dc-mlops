@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-artifacts-pvc-dev
+  namespace: smart-dc-dev
+  labels:
+    type: azurefile
+    environment: dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      type: azurefile
+      environment: dev
