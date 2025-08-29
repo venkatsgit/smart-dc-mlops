@@ -1,0 +1,22 @@
+# MLflow Production Environment Configuration
+ENVIRONMENT: prod
+NAMESPACE: smart-dc-prod
+MLFLOW_IMAGE: aimlsgkdchregistrydev.azurecr.io/smart-dc-mlflow:v3.3.2
+PORT: 8000
+DEBUG: False
+LOG_LEVEL: WARNING
+
+# Access Configuration - Ingress with automatic Load Balancer
+SERVICE_TYPE: ClusterIP
+MLFLOW_PATH: /mlflow
+
+# PostgreSQL Configuration
+PG_USER: kdchdb005
+PG_PASSWORD: 2Tc2AUypdnFr
+PG_HOST: kdch-sg-aiml-postgresql-01-c.postgres.database.azure.com
+PG_DATABASE: citus
+PG_PORT: 5432
+PG_SCHEMA: mlflow
+
+# Azure File Share Configuration
+FILESHARE_NAME: prod-preprocessed-artefacts

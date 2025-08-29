@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-artifacts-pvc-$ENVIRONMENT
+  namespace: $NAMESPACE
+  labels:
+    type: azurefile
+    environment: $ENVIRONMENT
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      type: azurefile
+      environment: $ENVIRONMENT

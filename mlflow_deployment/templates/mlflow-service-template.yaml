@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-service-$ENVIRONMENT
+  namespace: $NAMESPACE
+  labels:
+    app: mlflow
+    environment: $ENVIRONMENT
+spec:
+  type: $SERVICE_TYPE
+  ports:
+  - port: $PORT
+    targetPort: $PORT
+    protocol: TCP
+    name: http
+  selector:
+    app: mlflow
+    environment: $ENVIRONMENT
