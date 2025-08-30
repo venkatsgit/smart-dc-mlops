@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: basic-auth-configmap
+  namespace: smart-dc-dev
+data:
+  auth: |
+    mlops:mlopsuser
