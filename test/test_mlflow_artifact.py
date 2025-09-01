@@ -145,7 +145,8 @@ def main():
         mlflow.log_metric("artifact_count", 1)
         
         # Create and log a JSON artifact
-        artifact_path = os.path.join(mount_root, "test-write-access.txt")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        artifact_path = os.path.join(mount_root, f"test-write-access_{timestamp}.txt")
         
         # Ensure directory exists
         os.makedirs(os.path.dirname(artifact_path), exist_ok=True)
