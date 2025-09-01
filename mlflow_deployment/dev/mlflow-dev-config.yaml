@@ -11,8 +11,8 @@ SERVICE_TYPE: ClusterIP
 MLFLOW_PATH: /mlflowdev
 
 # PostgreSQL Configuration
-PG_USER: kdchdb005
-PG_PASSWORD: 2Tc2AUypdnFr
+PG_USER: <fill in the username>
+PG_PASSWORD: <fill in the password>
 PG_HOST: c.kdch-sg-aiml-postgresql-dev-02.postgres.database.azure.com
 PG_DATABASE: citus
 PG_PORT: 5432
