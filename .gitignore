@@ -1,0 +1,220 @@
+# =============================================================================
+# Smart DC MLOps .gitignore
+# =============================================================================
+
+# Generated deployment files (keep templates, ignore generated secrets)
+mlflow_deployment/dev/generated/*secret.yaml
+mlflow_deployment/prod/generated/*secret.yaml
+mlflow_deployment/dev/generated/*auth*.yaml
+mlflow_deployment/prod/generated/*auth*.yaml
+
+# Environment files and configuration
+.env
+*.env
+.env.local
+.env.development
+.env.production
+config.local.yaml
+config.local.yml
+*.local.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Logs and debugging
+*.log
+logs/
+debug_output.txt
+*.debug
+*.trace
+
+# Kubernetes and Docker
+*.kubeconfig
+kubeconfig
+.kube/
+docker-compose.override.yml
+.dockerignore
+
+# Secrets and sensitive data
+secrets/
+*.key
+*.pem
+*.crt
+*.csr
+*.p12
+*.pfx
+htpasswd
+auth/
+credentials/
+*.credentials
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+.tmp/
+.temp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*~
+
+# Test outputs and coverage
+test-outputs/
+test-results/
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# MLflow specific
+mlruns/
+mlflow.db
+mlflow.db-journal
+artifacts/
+models/
+experiments/
+runs/
+.mlflow/
+
+# Azure and cloud specific
+.azure/
+azure-credentials.json
+*.azure.json
+
+# Container registry and images
+*.tar
+*.tar.gz
+image-*.json
+
+# Monitoring and metrics
+prometheus-data/
+grafana-data/
+*.metrics
+
+# Documentation build
+docs/_build/
+site/
+_site/
+
+# Local development tools
+.local/
+local/
+dev-local/
+
+# Smart DC specific patterns
+smart-dc-*/venv/
+smart-dc-*/__pycache__/
+smart-dc-*/logs/
+smart-dc-*/data/
+smart-dc-*/models/
+smart-dc-*/artifacts/
+smart-dc-*/cache/
+smart-dc-*/chroma_db/
+smart-dc-*/trained_models*/
+smart-dc-*/test_artifacts_folder/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Model files and datasets
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+*.model
+*.weights
+*.bin
+*.safetensors
+*.onnx
+*.tflite
+*.pb
+
+# Large data files
+*.csv
+*.parquet
+*.feather
+*.arrow
+*.json.gz
+*.jsonl
+*.tsv
+
+# Training outputs
+checkpoints/
+outputs/
+results/
+wandb/
+tensorboard_logs/
+lightning_logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration overrides
+config.local.*
+settings.local.*

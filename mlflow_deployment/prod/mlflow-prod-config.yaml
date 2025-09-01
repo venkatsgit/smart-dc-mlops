@@ -5,6 +5,7 @@ MLFLOW_IMAGE: aimlsgkdchregistrydev.azurecr.io/smart-dc-mlflow:v3.3.2
 PORT: 8000
 DEBUG: False
 LOG_LEVEL: WARNING
+MLFLOW_TRACKING_LOG_LEVEL: DEBUG
 
 # Access Configuration - Use ClusterIP with Ingress
 SERVICE_TYPE: ClusterIP

@@ -62,8 +62,8 @@ spec:
           value: "8000"
         - name: MLFLOW_TRACKING_URI
           value: "postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PG_DATABASE)?options=-csearch_path%3D$(PG_SCHEMA)"
-        - name: MLFLOW_DEFAULT_ARTIFACT_ROOT
-          value: "file:///mlflow/artifacts"
+        - name: MLFLOW_TRACKING_LOG_LEVEL
+          value: "DEBUG"
 
         command:
         - mlflow
@@ -76,8 +76,7 @@ spec:
         - --backend-store-uri
         - "postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PG_DATABASE)?options=-csearch_path%3D$(PG_SCHEMA)"
         - --default-artifact-root
-        - "file:///mlflow/artifacts"
-        - --serve-artifacts
+        - "file:////mlflow/artifacts"
         volumeMounts:
         - name: mlflow-artifacts
           mountPath: /mlflow/artifacts

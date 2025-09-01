@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mlflow-test-job
+  namespace: smart-dc-dev
+  labels:
+    app: mlflow-test
+    environment: dev
+spec:
+  template:
+    metadata:
+      labels:
+        app: mlflow-test
+        environment: dev
+    spec:
+      containers:
+      - name: mlflow-test
+        image: aimlsgkdchregistrydev.azurecr.io/smart-dc-mlflow-test-client:latest
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://4.144.173.96/mlflowdev"
+        - name: MLFLOW_USERNAME
+          value: "mlops"
+        - name: MLFLOW_PASSWORD
+          value: "mlopsuser"
+        - name: MLFLOW_DEFAULT_ARTIFACT_ROOT
+          value: "file:///mlflow/artifacts"
+        - name: PYTHONPATH
+          value: "/app"
+        volumeMounts:
+        - name: mlflow-artifacts
+          mountPath: /mlflow/artifacts
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+      volumes:
+      - name: mlflow-artifacts
+        persistentVolumeClaim:
+          claimName: mlflow-artifacts-pvc-dev
+      restartPolicy: Never
+  backoffLimit: 3

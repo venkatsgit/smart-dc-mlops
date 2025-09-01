@@ -15,6 +15,3 @@ RUN python -c "import psycopg2; print('psycopg2 installed successfully')"
 
 # Set working directory
 WORKDIR /mlflow
-
-# Default command - use port 8000
-CMD ["mlflow", "server", "--host", "0.0.0.0", "--port", "8000"]
