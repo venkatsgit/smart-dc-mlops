@@ -40,6 +40,16 @@ def process_template(template_file, config, output_file):
     substitutions['PG_PORT_B64'] = base64_encode(config['PG_PORT'])
     substitutions['PG_SCHEMA_B64'] = base64_encode(config['PG_SCHEMA'])
     
+    # Base64 encode Azure Storage values for secrets
+    if 'AZURE_STORAGE_ACCOUNT_NAME' in config:
+        substitutions['AZURE_STORAGE_ACCOUNT_NAME_B64'] = base64_encode(config['AZURE_STORAGE_ACCOUNT_NAME'])
+    if 'AZURE_STORAGE_ACCOUNT_KEY' in config:
+        substitutions['AZURE_STORAGE_ACCOUNT_KEY_B64'] = base64_encode(config['AZURE_STORAGE_ACCOUNT_KEY'])
+    if 'AZURE_STORAGE_CONTAINER_NAME' in config:
+        substitutions['AZURE_STORAGE_CONTAINER_NAME_B64'] = base64_encode(config['AZURE_STORAGE_CONTAINER_NAME'])
+    if 'AZURE_STORAGE_CONNECTION_STRING' in config:
+        substitutions['AZURE_STORAGE_CONNECTION_STRING_B64'] = base64_encode(config['AZURE_STORAGE_CONNECTION_STRING'])
+    
     # Substitute values
     result = template.substitute(substitutions)
     
@@ -74,6 +84,11 @@ def main():
             "mlflow-pvc-template.yaml",
             "mlflow-postgres-secret-template.yaml"
         ]
+        
+        # Add Azure storage secret template if Azure storage config is present
+        if 'AZURE_STORAGE_ACCOUNT_NAME' in config:
+            template_files.append("mlflow-azure-storage-secret-template.yaml")
+            print(f"  Using Azure Blob storage with account: {config.get('AZURE_STORAGE_ACCOUNT_NAME')}")
         
         # Add Ingress template if MLFLOW_PATH is specified
         if config.get('MLFLOW_PATH'):

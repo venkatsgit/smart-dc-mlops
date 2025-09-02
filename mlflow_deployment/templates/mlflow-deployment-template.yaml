@@ -54,6 +54,26 @@ spec:
             secretKeyRef:
               name: mlflow-postgres-secret-$ENVIRONMENT
               key: PG_SCHEMA
+        - name: AZURE_STORAGE_ACCOUNT_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-azure-storage-secret-$ENVIRONMENT
+              key: AZURE_STORAGE_ACCOUNT_NAME
+        - name: AZURE_STORAGE_ACCOUNT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-azure-storage-secret-$ENVIRONMENT
+              key: AZURE_STORAGE_ACCOUNT_KEY
+        - name: AZURE_STORAGE_CONTAINER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-azure-storage-secret-$ENVIRONMENT
+              key: AZURE_STORAGE_CONTAINER_NAME
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-azure-storage-secret-$ENVIRONMENT
+              key: AZURE_STORAGE_CONNECTION_STRING
         - name: DEBUG
           value: "$DEBUG"
         - name: LOG_LEVEL
@@ -76,10 +96,7 @@ spec:
         - --backend-store-uri
         - "postgresql://$$(PG_USER):$$(PG_PASSWORD)@$$(PG_HOST):$$(PG_PORT)/$$(PG_DATABASE)?options=-csearch_path%3D$$(PG_SCHEMA)"
         - --default-artifact-root
-        - "file:///mlflow/artifacts"
-        volumeMounts:
-        - name: mlflow-artifacts
-          mountPath: /mlflow/artifacts
+        - "wasbs://$$(AZURE_STORAGE_CONTAINER_NAME)@$$(AZURE_STORAGE_ACCOUNT_NAME).blob.core.windows.net/"
         resources:
           requests:
             memory: "512Mi"
@@ -87,7 +104,3 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
-      volumes:
-      - name: mlflow-artifacts
-        persistentVolumeClaim:
-          claimName: mlflow-artifacts-pvc-$ENVIRONMENT

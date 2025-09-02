@@ -1,7 +1,7 @@
 # MLflow Dev Environment Configuration
 ENVIRONMENT: dev
 NAMESPACE: smart-dc-dev
-MLFLOW_IMAGE: aimlsgkdchregistrydev.azurecr.io/smart-dc-mlflow:v3.3.2
+MLFLOW_IMAGE: aimlsgkdchregistrydev.azurecr.io/smart-dc-mlflow:v3.3.2_1
 PORT: 8000
 DEBUG: False
 LOG_LEVEL: WARNING
@@ -21,3 +21,9 @@ PG_SCHEMA: mlflow
 
 # Azure File Share Configuration
 FILESHARE_NAME: dev-preprocessed-artifacts
+
+# Azure Blob Storage Configuration
+AZURE_STORAGE_ACCOUNT_NAME: kdchitappsdiag
+AZURE_STORAGE_ACCOUNT_KEY: uvAXtd0wi9jHLYUBY7Kfw+fRFEc5Yw5/Qsn2quay5sy0vTgCNApqp0yVHBt32NHcDA34HajM4yg3PWwHmeBxyw==
+AZURE_STORAGE_CONTAINER_NAME: dev-preprocessed-artifacts
+AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=https;AccountName=kdchitappsdiag;AccountKey=uvAXtd0wi9jHLYUBY7Kfw+fRFEc5Yw5/Qsn2quay5sy0vTgCNApqp0yVHBt32NHcDA34HajM4yg3PWwHmeBxyw==;EndpointSuffix=core.windows.net;
