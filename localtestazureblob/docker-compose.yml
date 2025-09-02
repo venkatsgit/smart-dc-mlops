@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  mlflow-server:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - AZURE_STORAGE_ACCOUNT_NAME=${AZURE_STORAGE_ACCOUNT_NAME:-kdchitappsdiag}
+      - AZURE_STORAGE_ACCOUNT_KEY=${AZURE_STORAGE_ACCOUNT_KEY:-uvAXtd0wi9jHLYUBY7Kfw+fRFEc5Yw5/Qsn2quay5sy0vTgCNApqp0yVHBt32NHcDA34HajM4yg3PWwHmeBxyw==}
+      - AZURE_STORAGE_CONTAINER_NAME=${AZURE_STORAGE_CONTAINER_NAME:-dev-preprocessed-artifacts}
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=https;AccountName=kdchitappsdiag;AccountKey=uvAXtd0wi9jHLYUBY7Kfw+fRFEc5Yw5/Qsn2quay5sy0vTgCNApqp0yVHBt32NHcDA34HajM4yg3PWwHmeBxyw==;EndpointSuffix=core.windows.net;}
+    volumes:
+      - ./mlflow_data:/app/mlflow_data
+    restart: unless-stopped
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:///mlflow_data/mlflow.db
+      --default-artifact-root wasbs://dev-preprocessed-artifacts@kdchitappsdiag.blob.core.windows.net/

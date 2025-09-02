@@ -2,17 +2,15 @@
 """
 Test script to log an artifact to MLflow with authentication - Windows Version
 This script demonstrates logging artifacts with DEBUG logging enabled for Windows local development
-Uses Z: drive mount for Azure File Share access
+Uses Z: drive mount for Azure File Share access (same share as Kubernetes)
 """
 
 import mlflow
 import os
-import tempfile
 import json
 import logging
 import sys
 from datetime import datetime
-from urllib.parse import urlparse
 
 # Enable detailed logging for MLflow
 logging.basicConfig(
@@ -23,13 +21,6 @@ logging.basicConfig(
 # Enable MLflow specific logging
 mlflow_logger = logging.getLogger('mlflow')
 mlflow_logger.setLevel(logging.DEBUG)
-
-# Enable HTTP request logging
-urllib3_logger = logging.getLogger('urllib3')
-urllib3_logger.setLevel(logging.DEBUG)
-
-requests_logger = logging.getLogger('requests')
-requests_logger.setLevel(logging.DEBUG)
 
 def create_test_artifact():
     """Create a simple test artifact"""
@@ -71,7 +62,7 @@ def verify_mount_access(mount_path):
 def main():
     """Main function to test MLflow artifact logging on Windows"""
     
-    # Windows-specific mount path - Z: drive
+    # Windows-specific mount path - Z: drive (same Azure File Share as Kubernetes)
     mount_root = 'Z:\\'
     
     # Check if we're running with environment override
@@ -89,23 +80,15 @@ def main():
         print(f"ERROR: {mount_message}")
         print("Please ensure the Azure File Share is mounted to Z: drive")
         print("Mount command example:")
-        print("  net use Z: \\\\yourstorageaccount.file.core.windows.net\\dev-preprocessed-artifacts /user:yourstorageaccount yourstoragekey")
+        print("  net use Z: \\\\kdchitappsdiag.file.core.windows.net\\dev-preprocessed-artifacts /user:yourstorageaccount yourstoragekey")
         sys.exit(1)
     else:
         print(f"✓ {mount_message}")
     
-    # Use the MLflow server URL for tracking
-    # Check if we're running with environment override or use defaults
-    if os.environ.get('MLFLOW_TRACKING_URI'):
-        MLFLOW_TRACKING_URI = os.environ.get('MLFLOW_TRACKING_URI')
-        # Check if authentication credentials are provided via environment variables
-        USERNAME = os.environ.get('MLFLOW_USERNAME')
-        PASSWORD = os.environ.get('MLFLOW_PASSWORD')
-    else:
-        # Windows local development - use external IP
-        MLFLOW_TRACKING_URI = "http://4.144.173.96/mlflowdev"
-        USERNAME = "mlops"
-        PASSWORD = "mlopsuser"
+    # Use the MLflow server URL for tracking (same as Kubernetes test job)
+    MLFLOW_TRACKING_URI = os.environ.get('MLFLOW_TRACKING_URI', "http://4.144.173.96/mlflowdev")
+    USERNAME = os.environ.get('MLFLOW_USERNAME', "mlops")
+    PASSWORD = os.environ.get('MLFLOW_PASSWORD', "mlopsuser")
     
     print("=" * 60)
     print("MLFLOW ARTIFACT TEST - WINDOWS")
@@ -116,7 +99,7 @@ def main():
     print(f"TRACKING URI: {MLFLOW_TRACKING_URI}")
     print(f"Connecting to MLflow server at: {MLFLOW_TRACKING_URI}")
     
-    # Set the tracking URI with authentication
+    # Set the tracking URI with authentication (same as Kubernetes)
     if USERNAME and PASSWORD:
         # Format: http://username:password@host:port/path
         from urllib.parse import urlparse
@@ -129,14 +112,18 @@ def main():
         print(f"Tracking URI (no auth): {MLFLOW_TRACKING_URI}")
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     
-    # Set environment variable for artifact store
-    os.environ['MLFLOW_DEFAULT_ARTIFACT_ROOT'] = f"file://{mount_root}"
-    print(f"Artifact store: file://{mount_root}")
+    # Set environment variable for artifact store (same as Kubernetes MLflow server)
+    # The MLflow server expects artifacts in /mlflow/artifacts, so we need to use the same path
+    os.environ['MLFLOW_DEFAULT_ARTIFACT_ROOT'] = "file:///Z:\\"
+    print(f"Artifact store: ile:///Z:\\")
     
     # Create test data
     test_data = create_test_artifact()
     
-    # Start an MLflow run
+    # Start an MLflow run with Windows-specific experiment
+    experiment_name = "windows_artifact_test_v4"
+    mlflow.set_experiment(experiment_name)
+    
     with mlflow.start_run(run_name="test_artifact_logging_windows") as run:
         print(f"Started MLflow run: {run.info.run_id}")
         
@@ -154,10 +141,18 @@ def main():
         mlflow.log_metric("platform_score", 1.0)
         
         # Create and log a JSON artifact
-        artifact_path = os.path.join(mount_root, "test-write-access-windows.txt")
+        # Since both Z: and /mlflow/artifacts point to the same Azure File Share,
+        # we create the artifact in Z: and MLflow will find it in /mlflow/artifacts
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(artifact_path), exist_ok=True)
+        # Create artifact in the MLflow run structure that the server expects
+        # The server expects: /mlflow/artifacts/{run_id}/artifacts/
+        # We create in: Z:\{run_id}\artifacts\
+        run_artifact_dir = os.path.join(mount_root, run.info.run_id, "artifacts")
+        os.makedirs(run_artifact_dir, exist_ok=True)
+        
+        artifact_filename = f"test-write-access-windows_{timestamp}.txt"
+        artifact_path = os.path.join(run_artifact_dir, artifact_filename)
         
         with open(artifact_path, 'w') as f:
             json.dump(test_data, f, indent=2)
@@ -168,8 +163,9 @@ def main():
             print(f"DEBUG: File exists: {os.path.exists(artifact_path)}")
             print(f"DEBUG: File size: {os.path.getsize(artifact_path)} bytes")
             
-            mlflow.log_artifact(artifact_path)
-            print(f"Successfully logged artifact: {artifact_path}")
+            # Log the artifact using the relative path that MLflow expects
+            mlflow.log_artifact(artifact_path, artifact_path=artifact_filename)
+            print(f"Successfully logged artifact: {artifact_filename}")
             
             # Log additional metadata
             print("DEBUG: About to log metadata dictionary")
@@ -189,11 +185,11 @@ def main():
         
         # Show where artifacts are stored and MLflow UI URL
         print(f"Artifacts stored at: {mount_root}")
-        print(f"Run artifacts: {os.path.join(mount_root, run.info.run_id, 'artifacts')}")
+        print(f"Run artifacts: {run_artifact_dir}")
         print()
         print("Configuration Summary:")
         print(f"  Tracking Server: {MLFLOW_TRACKING_URI}")
-        print(f"  Artifact Store: file://{mount_root}")
+        print(f"  Artifact Store: file:///mlflow/artifacts")
         print(f"  Platform: Windows")
         print(f"  Mount Type: Z: Drive")
         print()
@@ -206,12 +202,12 @@ if __name__ == "__main__":
     print()
     print("Configuration:")
     print("  Tracking Server: http://4.144.173.96/mlflowdev (with authentication)")
-    print("  Artifact Store: Z:\\ (Azure File Share mounted locally)")
+    print("  Artifact Store: file:///mlflow/artifacts (same as Kubernetes server)")
     print("  Platform: Windows")
     print()
     print("Prerequisites:")
     print("1. Mount Azure File Share to Z: drive:")
-    print("   net use Z: \\\\yourstorageaccount.file.core.windows.net\\dev-preprocessed-artifacts /user:yourstorageaccount yourstoragekey")
+    print("   net use Z: \\\\kdchitappsdiag.file.core.windows.net\\dev-preprocessed-artifacts /user:yourstorageaccount yourstoragekey")
     print()
     print("2. Verify Z: drive is accessible")
     print()
